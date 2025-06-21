@@ -1,108 +1,83 @@
-🔧 Task Distributor: Distributed Secure Code Execution System
+# 🔧 Task Distributor: Distributed Secure Code Execution System
 
-This project securely distributes and executes code files across multiple machines on the same local network. It uses encrypted socket communication to protect data while enabling parallel execution and result collection from clients.
+Task Distributor is a Python-based system that securely distributes and executes code files (Python, C++, Java) across multiple machines on a local network. It enables parallel execution, encrypted communication, and centralized result collection — all built using Python.
 
-🚀 Features
+---
 
-📡 Distributed Execution: Offloads code files to multiple client systems for concurrent execution
+## 🚀 Features
 
-🔐 End-to-End Encryption: Uses the cryptography library to ensure secure file transfer between server and clients
+- **Distributed Execution** – Sends tasks to multiple clients for concurrent execution
+- **End-to-End Encryption** – Uses `cryptography` to securely transfer files
+- **Parallel Processing** – Uses `threading` to manage multiple clients simultaneously
+- **Multi-language Support** – Executes `.py`, `.cpp`, and `.java` files
+- **Execution & Logging** – Collects execution results and logs them using `pandas`
 
-🔁 Parallel Processing: Utilizes Python's threading module for handling multiple clients at once
+---
 
-⚙️ Multi-language Support: Automatically compiles and runs Python, C/C++, and Java source files
+## ⚙️ How It Works
 
-📄 Task Logging: Records task statuses and output summaries using pandas
+1. **Task Distribution**  
+   The server scans the `tasks/` folder and assigns code files to clients in a round-robin manner.
 
-⚙️ How It Works
+2. **Secure Communication**  
+   Files are encrypted using Fernet encryption and decrypted by the client before execution.
 
-Task Distribution:
+3. **Code Execution**  
+   Clients run:
+   - `.py` files with Python  
+   - `.cpp`/`.c` files with `g++`  
+   - `.java` files with `javac` and `java`
 
-The server loads files from the tasks/ folder.
+4. **Result Collection**  
+   Each client sends back output and status, which the server stores in a pandas DataFrame and saves in `received_output/`.
 
-It distributes them evenly across all connected clients.
+---
 
-Secure Communication:
+## 🧰 Tech Stack
 
-Files are encrypted using the cryptography library.
+**Developed In:**  
+Python
 
-Clients decrypt and save them locally.
+**Supported Languages for Execution:**  
+Python, C/C++, Java
 
-Code Execution:
+**Core Technologies:**  
+Socket Programming, Cryptography (Fernet), Multithreading, Subprocess Execution, Pandas
 
-Clients compile/run the code based on file extension:
+**Python Libraries Used:**  
+- `socket`  
+- `cryptography`  
+- `threading`  
+- `subprocess`  
+- `pandas`  
+- `os`, `sys`
 
-.py → Python
+---
 
-.cpp/.c → C/C++
+## ✅ Requirements
 
-.java → Java
+- Python 3.x
+- g++ (for compiling C/C++ files)
+- JDK (for compiling and running Java files)
+- Install Python dependencies:  
+  ```bash
+  pip install cryptography pandas
 
-Result Collection:
+## 🔒 Security Note
 
-Output and status are sent back to the server.
+This system uses symmetric encryption with Fernet (from `cryptography`) to ensure that code files are securely transmitted over the network. While suitable for local secure networks, production environments should use additional validation and authentication mechanisms.
 
-Server logs this using a pandas dataframe and stores outputs in received_output/.
+---
 
-🧰 Tech Stack
+## 📌 Future Improvements
 
-Languages: Python, C/C++, Java
+- Add NLP-based static analysis to classify code behavior  
+- Implement certificate-based authentication for clients  
+- Include a GUI dashboard for real-time monitoring  
+- Dockerize clients and server for easier deployment
 
-Core Technologies:
+---
 
-Socket Programming
+## 📄 License
 
-Cryptography (Fernet Encryption)
-
-Multithreading
-
-Subprocess Execution
-
-Pandas for logging
-
-Key Python Libraries:
-
-socket
-
-cryptography
-
-threading
-
-subprocess
-
-pandas
-
-os, sys
-
-✅ Requirements
-
-Python 3.7+
-
-cryptography, pandas (install via pip)
-
-g++ compiler (for C/C++)
-
-Java (for .java file execution)
-
-🔒 Security Note
-
-This system uses symmetric encryption with Fernet (from cryptography) to ensure that code files are securely transmitted over the network. While suitable for local secure networks, production environments should use additional validation and authentication mechanisms.
-
-📌 Future Improvements
-
-Add NLP-based static analysis to classify code behavior
-
-Implement certificate-based authentication for clients
-
-Include a GUI dashboard for real-time monitoring
-
-Dockerize clients and server for easier deployment
-
-👨‍💻 Author
-
-Romith Pagadala
-
-📄 License
-
-This project is licensed under the MIT License.
-
+This project is licensed under the [MIT License](LICENSE).
