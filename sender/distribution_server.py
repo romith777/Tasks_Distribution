@@ -2,11 +2,16 @@ import socket
 import os
 import threading
 import pandas as pd
+from cryptography.fernet import Fernet
 
 CLIENT_IP = "localhost"
-CLIENT_PORTS = [9999, 9998, 9997]
+CLIENT_PORTS = [9999,9998,9997]
 TASKS_PATH = "tasks"
 OUTPUT_PATH = "received_output"
+
+ENCRYPTION_KEY = Fernet.generate_key()
+ENCRYPTION_KEY = b"5FH3fAyb27cr3h9lvJYmApalid3X4-VS0-CuMVx4Prs="
+cipher = Fernet(ENCRYPTION_KEY)
 
 clients = []
 Sent_tasks_status = []
@@ -36,22 +41,21 @@ size = int(len(sender_files)/no_of_clients)
 start_index = 0
 end_index = size
 
-# if len(sender_files) > no_of_clients:
-#     for i in range(no_of_clients):
-#         if i == no_of_clients - 1:
-#             cf = sender_files[start_index:]
-#         else:
-#             cf = sender_files[start_index:end_index]
-#         files_to_client.append(cf)
-#         start_index = end_index
-#         end_index += size
-#     allfile_tran = True
-# else:
-#     files_to_client=sender_files
+if len(sender_files) > no_of_clients:
+    for i in range(no_of_clients):
+        if i == no_of_clients - 1:
+            cf = sender_files[start_index:]
+        else:
+            cf = sender_files[start_index:end_index]
+        files_to_client.append(cf)
+        start_index = end_index
+        end_index += size
+    allfile_tran = True
+else:
+    files_to_client=sender_files
 
 def RoundR_file_Dist():
     for index,file in enumerate(sender_files):
-        print(file)
         files_to_client[(index)%(no_of_clients)].append(file)
 
 
@@ -63,17 +67,31 @@ def Client_output(client, c1f):
         if file_name == c1f[-1]:
             done = "1"
         print(f"Sending file: {file_name} to {client.getsockname()}")
-        client.send(os.path.basename(file_name).encode('utf-8'))
-        f =  open(file_name, "rb")
+
+        encrypted_file_name = cipher.encrypt(os.path.basename(file_name).encode('utf-8'))
+        client.send(encrypted_file_name)
+
+        with open(file_name,"rb") as f:
+            data = f.read()
+
+        encrypted_file_data = cipher.encrypt(data)
+
+        with open(f"{file_name}.encrypted","wb") as f:
+            f.write(encrypted_file_data)
+
+        f =  open(f"{file_name}.encrypted", "rb")
         data = f.read(1024)
         client.sendall(data)
         f.close()
         client.send(b"<FIN>")
+        os.remove(f"{file_name}.encrypted")
 
         output=""
         
-        status = client.recv(1024).decode('utf-8')
-        output = client.recv(1024).decode('utf-8')
+        status = client.recv(1024)
+        status = cipher.decrypt(status).decode('utf-8')
+        output = client.recv(1024)
+        output = cipher.decrypt(output).decode('utf-8')
 
         received_task_status["status"] = status
         received_task_status["client_address"] = (client.getsockname())
@@ -88,7 +106,9 @@ def Client_output(client, c1f):
             with open(file_name,"w") as f:
                 f.write(output)
 
-        client.send(done.encode('utf-8'))
+        encrypted_done = cipher.encrypt(done.encode('utf-8'))
+        client.send(encrypted_done)
+
     print(f"Finished sending files to {client.getsockname()}")
     
 
